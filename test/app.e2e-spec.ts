@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
+import { EditUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -125,10 +126,12 @@ describe('App e2e', () => {
 
   describe('User', () => {
     describe('Get me', () => {
+      const GET_ME_URL = '/users/me';
+
       it('should get current user', () => {
         return pactum
           .spec()
-          .get('/users/me')
+          .get(GET_ME_URL)
           .withHeaders({
             Authorization: 'Bearer $S{userAT}',
           })
@@ -136,7 +139,27 @@ describe('App e2e', () => {
       });
     });
 
-    describe('Edit user', () => {});
+    describe('Edit user', () => {
+      const EDIT_USER_URL = '/users';
+
+      it('should edit user', () => {
+        const dto: EditUserDto = {
+          firstName: 'test1',
+          email: 'test.edit@email.com',
+        };
+
+        return pactum
+          .spec()
+          .patch(EDIT_USER_URL)
+          .withHeaders({
+            Authorization: 'Bearer $S{userAT}',
+          })
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.firstName)
+          .expectBodyContains(dto.email);
+      });
+    });
   });
 
   describe('Bookmark', () => {
